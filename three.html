@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Three.js - Three.js</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <!--Three js-->
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/build/three.min.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <!--Canvas-->
+    <div id="canvas-container"></div>
+    <!--Script-->
+    <script>
+        const backgroundColor = 0x444444;
+
+        var renderCalls = [];
+
+        function render() {
+            requestAnimationFrame(render);
+            renderCalls.forEach((callback) => {
+                callback();
+            });
+        }
+        render();
+
+        var scene = new THREE.Scene();
+
+        var camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1200);
+        camera.position.set(-50, 50, 50);
+
+        var renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(backgroundColor);
+        renderer.physicallyCorrectLights = true;
+
+        renderer.toneMapping = THREE.LinearToneMapping;
+        renderer.toneMappingExposure = Math.pow(0.94, 5.0);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFShadowMap;
+
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }, false);
+
+        document.body.appendChild(renderer.domElement);
+
+        function renderScene() {
+            renderer.render(scene, camera);
+        }
+        renderCalls.push(renderScene);
+
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        controls.rotateSpeed = 0.3;
+        controls.zoomSpeed = 0.9;
+
+        controls.minDistance = 3;
+        controls.maxDistance = 2000;
+
+        controls.minPolarAngle = 0; // radians
+        controls.maxPolarAngle = Math.PI / 2; // radians
+
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        renderCalls.push(function() {
+            controls.update()
+        });
+
+        var loader = new THREE.GLTFLoader();
+        loader.crossOrigin = true;
+        loader.load('map.glb', function(data) {
+            var object = data.scene;
+            object.position.set(0, -20, -0.75);
+            scene.add(object);
+        });
+    </script>
+</body>
+
+</html>
